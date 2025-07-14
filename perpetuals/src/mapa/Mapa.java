@@ -9,12 +9,15 @@ public class Mapa {
     private UndirectedGraphList grafo;
 
     public Mapa() {
-        grafo = new UndirectedGraphList(6);
+        grafo = new UndirectedGraphList(9);
         grafo.addEdge(1, 2);
         grafo.addEdge(2, 3);
         grafo.addEdge(2, 4);
         grafo.addEdge(2, 5);
         grafo.addEdge(3, 4);
+        grafo.addEdge(5, 6);
+        grafo.addEdge(6, 7);
+        grafo.addEdge(6, 8);
     }
 
     public List<Integer> getSalasVecinas(int salaActual) {
@@ -33,5 +36,9 @@ public class Mapa {
 
     public void mostrarMapa() {
         grafo.printGraph();
+    }
+    
+    public UndirectedGraphList getGrafo() {
+        return grafo;
     }
 }

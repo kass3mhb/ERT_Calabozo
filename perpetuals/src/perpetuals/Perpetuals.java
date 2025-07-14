@@ -11,6 +11,10 @@ public class Perpetuals {
 
     private static Scanner scanner = new Scanner(System.in); // scanner global para no estar declarandolo en cada metodo
     
+    // variables para los eventoSala
+    private static boolean llaveCofreObtenida = false;
+    private static boolean cofreAbierto = false;
+    
     public static void main(String[] args) {
         Mapa mapa = new Mapa();
         menu(mapa);
@@ -27,15 +31,23 @@ public class Perpetuals {
                     intro(mapa);
                 break;
             case "2":         
-                    System.out.println("Chao");
+                    System.exit(0);
                 break;
             default:
-                    System.out.println("elije bien");
+                    System.out.println("elige bien");
                 break;
         }
     }
     private static void intro(Mapa mapa) {
             User jugador = new User("Perpetuo");
+            
+            Narrar("Una sombra cruza el cielo...");
+
+            Narrar("El cuervo extiende sus alas y sobrevuela las ruinas del calabozo...");
+            mapa.getGrafo().dfs(8);  
+            Narrar("Son el numero de salas de este laberinto");
+            
+            Narrar("Las alas se repliegan. El viaje comenzará pronto...\n");
             Narrar("La piedra está fría.\n" +
             "La humedad se filtra entre las grietas del suelo y el aire huele a óxido y encierro.\n" +
             "Una figura yace encorvada en la oscuridad: piel apagada, ojos hundidos, alma rota…\n\n" +
@@ -103,6 +115,8 @@ public class Perpetuals {
                 explorar(mapa, jugador);
             } else if (decision.equals("2")) {
                 Narrar("Decides quedarte un momento más...\nLa oscuridad te acompaña en silencio.");
+                jugador.setSalaActual(1);      // posición inicial al salir
+                explorar(mapa, jugador);
             } else {
                 System.out.println("Decisión inválida.");
             }
@@ -112,7 +126,11 @@ public class Perpetuals {
         break;
 
         case "2":
+            Narrar("Esta llave parece haber caido del cielo, ¿el pajaro me la lanzo?...\nCon esto puedo abrir la celda y avanzar a la sala 2.");
             jugador.mostrarInventario();
+            jugador.setSalaActual(1);      
+            explorar(mapa, jugador);
+            
             break;
 
         default:
@@ -176,24 +194,94 @@ public static void Narrar(String texto) {
             }
         }
     }
-    
     private static void eventoSala(int sala, User jugador) {
         switch (sala) {
-            case 2:
-                Narrar("ejemplo");
-                break;
+            case 1:
+                if (jugador.isEventoLadronActivado() && !jugador.tieneItem("Llave secreta del ladrón")) {
+                    Narrar("Encuentras un cuerpo sin vida apoyado contra la pared... Es el ladrón.");
+                    Narrar("Tiene marcas de quemaduras arcanas y su cuerpo está retorcido en dolor.");
+                    Narrar("Entre sus dedos rígidos, aún aprieta una pequeña llave con inscripciones extrañas.");
+                    Narrar("Obtienes: Llave secreta del ladrón.");
+                    jugador.agregarItem(new Item("Llave secreta del ladrón", "llave"));
+                }
+            break;
+
             case 3:
-                Narrar("");
+                if (!llaveCofreObtenida) {
+                    Narrar("Encuentras algo en una esquina polvorienta...\n¡Es una Llave de cofre!");
+                    jugador.agregarItem(new Item("Llave de cofre", "llave"));
+                    llaveCofreObtenida = true;
+                }
                 break;
+
             case 4:
-                Narrar("");
+                if (!cofreAbierto) {
+                    Narrar("Hay un cofre antiguo frente a ti...");
+                    if (jugador.tieneItem("Llave de cofre")) {
+                        Narrar("Usas la Llave de cofre y el cofre se abre lentamente...\n¡Obtienes un Talismán de protección!");
+                        jugador.agregarItem(new Item("Talismán", "artefacto"));
+                        cofreAbierto = true;
+                    } else {
+                        Narrar("El cofre está cerrado. Parece que necesita una llave especial...");
+                    }
+                }
                 break;
+
             case 5:
-                Narrar("");
+                if (!jugador.tieneItem("Talismán")) {
+                    Narrar("Una barrera mágica bloquea el paso.\nSin un talismán protector no puedes avanzar más allá...");
+                    jugador.setSalaActual(2); // Reversa el movimiento
+                } else {
+                    Narrar("El talismán vibra al acercarte...\nLa barrera mágica desaparece. Puedes avanzar.");
+                }
                 break;
-            default:
+
+            case 6:
+                Narrar("Encuentras dos caminos... hacia adelante... hay una puerta dentro de lo que parece ser un manantial (sala 9), se necesita un talismán, por otro lado una cueva con niebla (sala 7)");
+                break;
+
+        case 7:
+            if (!jugador.isEventoLadronActivado()) {
+                jugador.activarEventoLadron();
+                Narrar("Entras a una sala oscura... entre la niebla densa ves lo que parece ser... ¡Un cofre! y una llave al lado.");
+                Narrar("Escuchas pasos... un ladrón ha pasado corriendo y se lleva la llave.");
+                Narrar("—¡Tonto! ¡Este tesoro es mío, ja ja ja!");
+                Narrar("[El ladrón ha salido corriendo y ha traspasado una puerta que necesita un talismán.]");
+                Narrar("[El ladrón ha sufrido severos daños por hacer eso... No debe de poder avanzar demasiado con esas heridas.]");
+            } else if (jugador.tieneItem("Llave secreta del ladrón") && !jugador.tieneItem("Talisman de agua")) {
+                Narrar("Usas la llave secreta del ladrón para abrir el cofre.");
+                Narrar("Dentro encuentras un talismán con un brillo extraño...");
+                jugador.agregarItem(new Item("Talisman de agua", "reliquia"));
+            } else if (!jugador.tieneItem("Llave secreta del ladrón") && !jugador.tieneItem("Talisman de agua")) {
+                Narrar("El cofre permanece cerrado. La llave fue robada por el ladrón.");
+                Narrar("Ese desquiciado entró en un pozo sin salida al cruzar la barrera mágica sin protección...");
+                Narrar("No debe de estar muy lejos.");
+            }
+            break;
+            case 8:
+                if (!jugador.tieneItem("Talisman de agua")) {
+                    Narrar("Una barrera de agua bloquea el camino.\nCon un talismán de agua quizá me dejaría avanzar más allá...");
+                    jugador.setSalaActual(6); 
+                } else {
+                    Narrar("La reliquia comienza a brillar intensamente al acercarte...");
+                    Narrar("Una barrera de agua se forma a tu alrededor, protegiéndote del poder que emana del portal.");
+                    Narrar("Das un paso... luego otro... y atraviesas la barrera sin resistencia.");
+                    Narrar("Del otro lado, una luz cálida golpea tu rostro...");
+                    Narrar("¡Es la luz del sol!");
+
+                    Narrar("Sales del calabozo por una enorme abertura en la roca...\nEl aire fresco llena tus pulmones por primera vez en lo que parece una eternidad.");
+                    Narrar("Desde el cielo desciende un majestuoso cuervo negro, de ojos antiguos y alas colosales.");
+                    Narrar("—Perpetuo... —dice con voz grave y solemne—\nTu camino no ha acabado aquí.");
+                    Narrar("Te recogeré de esta prisión olvidada y te llevaré a un nuevo reino, donde el verdadero propósito de tu existencia será revelado...");
+                    Narrar("Eres uno entre muchos, un elegido entre los condenados.\nTe esperan más secretos, más acertijos, más pruebas.");
+
+                    Narrar("El cuervo te alza con sus garras, y mientras te elevas, el calabozo queda atrás...");
+                    Narrar("Tu historia apenas comienza...");
+
+                    System.out.println("\n--- FIN DEL JUEGO (continuara...) ---");
+                    System.exit(0);
+                }
                 break;
         }
-    }
-    
+    }    
 }

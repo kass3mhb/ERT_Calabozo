@@ -8,6 +8,7 @@ public class User {
     private String nombre;
     private Inventario inventario;
     private int salaActual = 1; // empieza en la celda, sala 1
+    private boolean eventoLadronActivado = false; // evento del ladron, para que solo ocurra una vez por personaje
 
     public User(String nombre) {
         this.nombre = nombre;
@@ -42,5 +43,13 @@ public class User {
 
     public void setSalaActual(int sala) {
         this.salaActual = sala;
+    }
+    
+    public boolean isEventoLadronActivado() {
+        return eventoLadronActivado;
+    }
+
+    public void activarEventoLadron() {
+        this.eventoLadronActivado = true;
     }
 }
