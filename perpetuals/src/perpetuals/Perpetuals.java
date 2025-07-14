@@ -5,15 +5,18 @@ import java.util.Scanner;
 //importes
 import user.User;
 import estructuras.Item;
+import mapa.Mapa;
 
 public class Perpetuals {
 
+    private static Scanner scanner = new Scanner(System.in); // scanner global para no estar declarandolo en cada metodo
+    
     public static void main(String[] args) {
-        menu();
+        Mapa mapa = new Mapa();
+        menu(mapa);
     }
     
-    private static void menu(){
-        Scanner scanner = new Scanner(System.in);
+    private static void menu(Mapa mapa){
         System.out.println("PERPETUALS");
         System.out.println("1. Jugar");
         System.out.println("2. Salir");
@@ -21,7 +24,7 @@ public class Perpetuals {
         String opcion = scanner.nextLine();
         switch (opcion) {
             case "1":
-                    intro();
+                    intro(mapa);
                 break;
             case "2":         
                     System.out.println("Chao");
@@ -31,8 +34,7 @@ public class Perpetuals {
                 break;
         }
     }
-    private static void intro() {
-            Scanner scanner = new Scanner(System.in);
+    private static void intro(Mapa mapa) {
             User jugador = new User("Perpetuo");
             Narrar("La piedra está fría.\n" +
             "La humedad se filtra entre las grietas del suelo y el aire huele a óxido y encierro.\n" +
@@ -97,7 +99,8 @@ public class Perpetuals {
             String decision = scanner.nextLine();
             if (decision.equals("1")) {
                 Narrar("El Perpetuo atraviesa el umbral de la celda...\nAvanzas hacia la Sala 2.");
-                // Aquí podrías llamar a una función sala2()
+                jugador.setSalaActual(2);      // posición inicial al salir
+                explorar(mapa, jugador);
             } else if (decision.equals("2")) {
                 Narrar("Decides quedarte un momento más...\nLa oscuridad te acompaña en silencio.");
             } else {
@@ -138,5 +141,59 @@ public static void Narrar(String texto) {
     }
     System.out.println();
 }
+
+    private static void explorar(Mapa mapa, User jugador) {
+        mapa.mostrarMapa(); // mostrar el grafo, la lista de adyacencia siempre la primera vez (en resources igual hay una foto del mapa)
+
+        while (true) {
+            int actual = jugador.getSalaActual(); // en actual guardamos la sala en la que esta el usuario la primera vez, (en 1 en la celda)
+            mapa.List<Integer> vecinos = mapa.getSalasVecinas(actual); //lista de sala vecinas en base a la de la actual del jugador
+
+            System.out.println("\n-------------------------------------");
+            System.out.println("Estás en la sala " + actual + ". ¿Qué deseas hacer?");
+            for (int i = 0; i < vecinos.size(); i++) {
+                System.out.println((i + 1) + ". Ir a sala " + vecinos.get(i)); // recursovamente imprime las salas vecinas a la qu esta situada el usuario
+            }
+            System.out.println((vecinos.size() + 1) + ". Ver inventario");
+
+            System.out.print("Elige una opción: ");
+            String entrada = scanner.nextLine();
+
+            try {
+                int eleccion = Integer.parseInt(entrada);
+                if (eleccion >= 1 && eleccion <= vecinos.size()) {
+                    int destino = vecinos.get(eleccion - 1);
+                    jugador.setSalaActual(destino);
+                    Narrar("Avanzas hacia la sala " + destino + "...");
+                    eventoSala(destino, jugador);
+                } else if (eleccion == vecinos.size() + 1) {
+                    jugador.mostrarInventario();
+                } else {
+                    System.out.println("Opción inválida.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Ingresa un número válido.");
+            }
+        }
+    }
+    
+    private static void eventoSala(int sala, User jugador) {
+        switch (sala) {
+            case 2:
+                Narrar("ejemplo");
+                break;
+            case 3:
+                Narrar("");
+                break;
+            case 4:
+                Narrar("");
+                break;
+            case 5:
+                Narrar("");
+                break;
+            default:
+                break;
+        }
+    }
     
 }

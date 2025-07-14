@@ -1,4 +1,4 @@
-package perpetuals.mapa;
+package mapa;
 
 import mapa.UndirectedGraphList;
 import mapa.List;

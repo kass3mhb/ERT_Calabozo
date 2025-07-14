@@ -224,3 +224,114 @@ public class Mapa {
         grafo.printGraph();
     }
 }
+
+[commit 2 - desde las 5 am hasta las 8pm]
+
+Ok, ayer al poner la clase mapa y declarar el mapa de grafos
+
+        grafo = new UndirectedGraphList(6);
+        grafo.addEdge(1, 2);
+        grafo.addEdge(2, 3);
+        grafo.addEdge(2, 4);
+        grafo.addEdge(2, 5);
+        grafo.addEdge(3, 4);
+
+hoy lo montamos en la main
+
+import mapa.Mapa;
+
+    public static void main(String[] args) {
+        Mapa mapa = new Mapa();
+        menu(mapa);
+    }
+
+y declaramos globalmente al scanner
+
+private static Scanner scanner = new Scanner(System.in);
+
+con el mapa declarado ahora queremos que este mapa pase tanto por menu como intro asi que se lo pasamos como paramentro
+
+private static void menu(Mapa mapa)
+
+luego a intro 
+
+private static void intro(Mapa mapa)
+
+asi en la main
+
+    public static void main(String[] args) {
+        Mapa mapa = new Mapa();
+        menu(mapa);
+    }
+
+asi el usuario aparte de tener su inventario tambien tendra su mapa asignado
+
+para luego llegar al ultimo metodo recursivo, pero mas que recursivo simplemente es un bucle, la premisa es que cada que el usuario se situe en un nodo, pueda elegir a donde ir en base a la lista de abyacencia, entonces..
+
+private static void explorar(Mapa mapa, User jugador) {
+        mapa.mostrarMapa(); // mostrar el grafo, la lista de adyacencia siempre la primera vez (en resources igual hay una foto del mapa)
+
+        while (true) {
+            int actual = jugador.getSalaActual(); // en actual guardamos la sala en la que esta el usuario la primera vez, (en 1 en la celda)
+            mapa.List<Integer> vecinos = mapa.getSalasVecinas(actual); //lista de sala vecinas en base a la de la actual del jugador
+
+            System.out.println("\n-------------------------------------");
+            System.out.println("Estás en la sala " + actual + ". ¿Qué deseas hacer?");
+            for (int i = 0; i < vecinos.size(); i++) {
+                System.out.println((i + 1) + ". Ir a sala " + vecinos.get(i)); // recursovamente imprime las salas vecinas a la qu esta situada el usuario
+            }
+            System.out.println((vecinos.size() + 1) + ". Ver inventario");
+
+            System.out.print("Elige una opción: ");
+            String entrada = scanner.nextLine();
+    }
+}
+
+Asi quedo nuestro metodo, en la consola dependiendo de donde nos coloquemos nos mostraba las salas abyacentes en funcion a donde estaba parado el usuario
+
+PERO no sabiamos como plantear el movimiento entre salas asi que le pedimos a la IA algo tipo
+
+"Por favor necesitamos que el usuario pueda moverse entre las abyacentes y nos complemento con 
+
+try {
+                int eleccion = Integer.parseInt(entrada);
+                if (eleccion >= 1 && eleccion <= vecinos.size()) {
+                    int destino = vecinos.get(eleccion - 1);
+                    jugador.setSalaActual(destino);
+                    Narrar("Avanzas hacia la sala " + destino + "...");
+                    eventoSala(destino, jugador);
+                } else if (eleccion == vecinos.size() + 1) {
+                    jugador.mostrarInventario();
+                } else {
+                    System.out.println("Opción inválida.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Ingresa un número válido.");
+            }
+
+Y abajo de de Avanzas hacia la sala...
+debjao hay un evento sala, ese metodo eventoSala tomara como parametro al jugador y al a sala donde se movera, y cada sala sala tendra su evento, como tener llaves o pistas
+
+pero por ahora esta vacio pero funciona todo chevere
+
+private static void eventoSala(int sala, User jugador) {
+        switch (sala) {
+            case 2:
+                Narrar("ejemplo");
+                break;
+            case 3:
+                Narrar("");
+                break;
+            case 4:
+                Narrar("");
+                break;
+            case 5:
+                Narrar("");
+                break;
+            default:
+                break;
+        }
+    }
+
+Aparte de este uso de la IA, lo demas ha sido corrigiendo errores entre paquetes pero por ahora esta funcional el movimiento con sus eventos
+
