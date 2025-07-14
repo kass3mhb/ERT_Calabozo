@@ -1,0 +1,226 @@
+[commit 1 - desde las 11 am hasta las 9pm]
+
+bueno para empezar, elegimos la tematica del proyecto en base a un calabozo, nuestra pirnicpal fuente de inspiracion fue Dark Souls 1, en donde el usuario comienza en un calabozo y le dan una llave, el usuario debera avanzar e interactuar un poco con el entorno par aencontrarse de primeras con un boss, dicho boss es imposible derrotarle al principio por lo que debes tomar una ruta alternativa, recoger recursos y volver a el y derrotarlo un poco mas fuerte para poder avanzar, cada habitacion por las que el usuario pasa, desde el inicio hasta el final pueden interpretarse como nodos, y gracias grafo de lista indirecta el usuario pueda moverse entre las habitaciones con total libertad, porque la idea es que de cada sala agote los "dialogos" o las acciones y el juego lo ira guiando de forma intuitiva. Al derrotar el boss el usuario podra seguir caminando y descubriendo zonas, que estan limitadas por el proyecto claro, pero lo deja abierto a que se pueda continuar en un futuro, decidimos colocarle "Perpetuals" porque la idea es que el usuario al terminar el juego se vuelva el nuevo boss del calabozo y asi al crear una nueva partida, el usuario debe derrotar al antiguo jugador que fue el mismo, tomando un poco de paralelismo con el juego en el que nos inspiramos que va por esos aires.
+
+Bien, teniendo esa premisa nos pusimos manos a la obra
+
+Creamos un proyecto java llamado "perpetual"
+
+en el paquete perpetuals donde estara la main estatica, fluira el videojuego por consola donde al usuario se le narrara la historia con un algoritmo que permite mostrar el texto con un poco de delay.
+
+El algoritmo:
+public static void Narrar(String texto) {
+    for (int i = 0; i < texto.length(); i++) {
+        char c = texto.charAt(i);
+        System.out.print(c);
+        System.out.flush();
+
+        try {
+            if (c == '.' || c == ',' || c == '…') {
+                Thread.sleep(200); // pausa larga en signos
+            } else {
+                Thread.sleep(10);  // pausa normal por letra
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+    System.out.println();
+}
+
+Ejemplo del flujo del programa:
+
+    public static void main(String[] args) {
+        menu();
+    }
+    
+    private static void menu(){
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("PERPETUALS");
+        System.out.println("1. Jugar");
+        System.out.println("2. Salir");
+        System.out.print("Seleccione una opcion: ");
+        String opcion = scanner.nextLine();
+        switch (opcion) {
+            case "1":
+                    intro();
+                break;
+            case "2":         
+                    System.out.println("Chao");
+                break;
+            default:
+                    System.out.println("elije bien");
+                break;
+        }
+    }
+
+Y en intro:
+
+private static void intro() {
+            Scanner scanner = new Scanner(System.in);
+            User jugador = new User("Perpetuo");
+            Narrar("La piedra está fría.\n" +
+            "La humedad se filtra entre las grietas del suelo y el aire huele a óxido y encierro.\n" +
+            "Una figura yace encorvada en la oscuridad: piel apagada, ojos hundidos, alma rota…\n\n" +
+
+            "Es el Perpetuo.\n\n" +
+
+etc.. etc..
+
+        Narrar("\n\n¡Has obtenido: Llave de celda!\n");
+        Narrar("[Llave de celda ha sido añadida a tu inventario]");
+        jugador.agregarItem(new Item("Llave de celda", "llave"));
+        System.out.println("¿Que deseas hacer?");
+        System.out.println("1. Abrir celda");
+        System.out.println("2. Ver inventario.");
+        System.out.print("Selecciona una opción: ");
+        opcion = scanner.nextLine();
+        switch (opcion) {
+
+Evidenciando asi que cada que el usuario opta por una opcion tendra consecuencias
+
+Enconces teniendo claro como sera el flujo de la narracion y como el usuario jugara
+
+en el paquete estructuras 
+
+hicimos una estructura de datos, una lista, llama inventario y una clase item de la cual estara llena
+
+package estructuras;
+
+public class Inventario {
+
+    private Nodo cabeza;
+
+    // Clase interna Nodo
+    private class Nodo {
+        Item item;
+        Nodo siguiente;
+
+        Nodo(Item item) {
+            this.item = item;
+            this.siguiente = null;
+        }
+    }
+
+    public void agregar(Item item) {
+        Nodo nuevo = new Nodo(item);
+        if (cabeza == null) {
+            cabeza = nuevo;
+        } else {
+            Nodo actual = cabeza;
+            while (actual.siguiente != null) {
+                actual = actual.siguiente;
+            }
+            actual.siguiente = nuevo;
+        }
+    }
+
+    public void mostrar() {
+        Nodo actual = cabeza;
+        System.out.println("\nInventario:\n");
+        if (actual == null) {
+            System.out.println("- (vacío)");
+            return;
+        }
+        while (actual != null) {
+            System.out.println("- " + actual.item);
+            actual = actual.siguiente;
+        }
+    }
+    
+    public boolean contiene(String nombre) {
+        Nodo actual = cabeza;
+        while (actual != null) {
+            if (actual.item.getNombre().equalsIgnoreCase(nombre)) {
+                return true;
+            }
+            actual = actual.siguiente;
+        }
+        return false;
+    }
+}
+
+package estructuras;
+
+public class Item {
+    private String nombre;
+    private String tipo; 
+
+    public Item(String nombre, String tipo) {
+        this.nombre = nombre;
+        this.tipo = tipo;
+    }
+    
+        public String getNombre() {
+        return nombre;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    @Override
+    public String toString() {
+        return nombre + " [" + tipo + "]";
+    }
+}
+
+
+hicimos la clase user que estara en su paquete user para que pudiese interactuar con dicho inventario teniendolo como atributo
+
+package user;
+
+import estructuras.Item;
+import estructuras.Inventario;
+
+public class User {
+
+    private String nombre;
+    private Inventario inventario;
+
+    public User(String nombre) {
+        this.nombre = nombre;
+        this.inventario = new Inventario();
+    }
+
+Y por ultimo un paquete mapa, donde estara: Grafo, List y UndirectedGraphList que son la base para montar el grafo, como se explico en clases, la razon por la que usamos una indirecta es porque queremos que el usuario pueda ir desde un nodo a otro, que en este caso seran salas, que tenga libertad de moverse.
+
+dentro del paque mapa, estara una clase llamada mapa donde se creara la estructura del mapa (dicho mapa es un poco mas amplio pero por ahora esta bien asi para ir probando)
+
+package perpetuals.mapa;
+
+import mapa.UndirectedGraphList;
+import mapa.List;
+
+
+public class Mapa {
+
+    private UndirectedGraphList grafo;
+
+    public Mapa() {
+        grafo = new UndirectedGraphList(6);
+        grafo.addEdge(1, 2);
+        grafo.addEdge(2, 3);
+        grafo.addEdge(2, 4);
+        grafo.addEdge(2, 5);
+        grafo.addEdge(3, 4);
+    }
+
+    public List<Integer> getSalasVecinas(int salaActual) {
+        return grafo.getAdyacentes(salaActual);
+    }
+
+    public boolean puedeMoverse(int desde, int hacia) {
+        List<Integer> vecinos = grafo.getAdyacentes(desde);
+        for (int i = 0; i < vecinos.size(); i++) {
+            if (vecinos.get(i) == hacia) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void mostrarMapa() {
+        grafo.printGraph();
+    }
+}
